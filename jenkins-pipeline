@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('cloning') {
+            steps {
+                git 'https://github.com/gandlamahathi29/Elevate-labs-Task-2-.git'
+            }
+        }
+
+        stage('docker login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'e490184c-7d3d-450e-9bde-568619e2fd4a',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
+            }
+        }
+
+        stage('docker build') {
+            steps {
+                sh 'docker build -t sravani429/task-2:latest .'
+            }
+        }
+
+        stage('push image to docker hub') {
+            steps {
+                sh 'docker push sravani429/task-2:latest'
+            }
+        }
+         stage('Deploy the Image in Docker Engine') {
+            steps {
+                sh 'docker run -itd --name task-2 -p 50:80 sravani429/task-2:latest'
+            }
+         }
+    }
+}
